@@ -1,0 +1,52 @@
+{%- comment -%}
+  Renders one blog post card.
+
+  Accepts:
+  - article: {Object} the blog post (optional if custom_title is given)
+  - show_date: {Boolean} show the date (default: true)
+  - custom_image: {Object} image that replaces the post's image (optional)
+  - custom_title: {String} text that replaces the post's title (optional)
+  - custom_date: {String} text that replaces the post's date (optional)
+  - custom_link: {String} URL that replaces the post's link (optional)
+
+  Usage:
+  {% render 'blog-card', article: article, custom_title: 'My title' %}
+{%- endcomment -%}
+
+{%- comment -%} Use the custom value if filled in, otherwise the post's own value {%- endcomment -%}
+{%- assign card_image = custom_image | default: article.image -%}
+{%- assign card_title = custom_title | default: article.title -%}
+{%- assign card_link = custom_link | default: article.url -%}
+
+<a href="{{ card_link | default: '#' }}" class="bpg__card">
+  <div class="bpg__media">
+    {%- if card_image -%}
+      {%- assign image_alt = card_image.alt | default: card_title | escape -%}
+      {{
+        card_image
+        | image_url: width: 1200
+        | image_tag:
+          class: 'bpg__image',
+          loading: 'lazy',
+          alt: image_alt,
+          widths: '400, 600, 800, 1200',
+          sizes: '(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw'
+      }}
+    {%- else -%}
+      {{ 'blog-apparel-1' | placeholder_svg_tag: 'bpg__image bpg__image--placeholder' }}
+    {%- endif -%}
+  </div>
+
+  <div class="bpg__content">
+    {%- unless show_date == false -%}
+      {%- if custom_date != blank -%}
+        <p class="bpg__date">{{ custom_date | escape }}</p>
+      {%- elsif article.published_at -%}
+        <p class="bpg__date">{{ article.published_at | time_tag: '%b %-d, %Y' }}</p>
+      {%- endif -%}
+    {%- endunless -%}
+    <h3 class="bpg__title">
+      <span class="bpg__title-text">{{ card_title | escape }}</span>
+    </h3>
+  </div>
+</a>

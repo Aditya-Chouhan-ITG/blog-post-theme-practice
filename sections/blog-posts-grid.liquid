@@ -1,0 +1,362 @@
+{%- comment -%}
+  Blog posts grid
+  Shows posts from one blog as cards: image, date, title.
+  Image zooms slightly and title underlines on hover.
+{%- endcomment -%}
+
+{%- assign blog = section.settings.blog -%}
+
+<div
+  class="bpg"
+  style="
+    --bpg-bg: {{ section.settings.background_color }};
+    --bpg-text: {{ section.settings.text_color }};
+    --bpg-columns: {{ section.settings.columns }};
+    --bpg-pad-top: {{ section.settings.padding_top }}px;
+    --bpg-pad-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="bpg__inner page-width">
+
+    {%- comment -%} Heading + View all button {%- endcomment -%}
+    <div class="bpg__header">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="bpg__heading">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.show_view_all and blog != blank -%}
+        <a href="{{ blog.url }}" class="bpg__button">
+          {{ section.settings.button_label }}
+        </a>
+      {%- endif -%}
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      {%- comment -%}
+        BLOCKS: posts picked by hand in the editor, in the order you arranged them.
+      {%- endcomment -%}
+      <ul class="bpg__grid" role="list">
+        {%- for block in section.blocks -%}
+          {%- assign article = block.settings.article -%}
+          <li class="bpg__item" {{ block.shopify_attributes }}>
+            {%- if article != blank or block.settings.title != blank -%}
+              {% render 'blog-card',
+                article: article,
+                show_date: section.settings.show_date,
+                custom_image: block.settings.image,
+                custom_title: block.settings.title,
+                custom_date: block.settings.date,
+                custom_link: block.settings.link
+              %}
+            {%- elsif request.design_mode -%}
+              <div class="bpg__card bpg__card--empty">
+                <div class="bpg__media"></div>
+                <div class="bpg__content">
+                  <p class="bpg__date">Choose a blog post or add a title</p>
+                </div>
+              </div>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+
+    {%- elsif blog != blank and blog.articles_count > 0 -%}
+      {%- comment -%}
+        NO BLOCKS: fall back to the latest posts from the chosen blog.
+      {%- endcomment -%}
+      <ul class="bpg__grid" role="list">
+        {%- for article in blog.articles limit: section.settings.post_limit -%}
+          <li class="bpg__item">
+            {% render 'blog-card', article: article, show_date: section.settings.show_date %}
+          </li>
+        {%- endfor -%}
+      </ul>
+
+    {%- elsif request.design_mode -%}
+      {%- comment -%} Only visible inside the theme editor {%- endcomment -%}
+      <p class="bpg__empty">Choose a blog with posts, or add Blog post blocks.</p>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{% stylesheet %}
+  .bpg {
+    background-color: var(--bpg-bg);
+    color: var(--bpg-text);
+    padding-top: var(--bpg-pad-top);
+    padding-bottom: var(--bpg-pad-bottom);
+  }
+
+  /* ---------- Header ---------- */
+  .bpg__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3.2rem;
+    margin-bottom: 6rem;
+    text-align: center;
+  }
+
+  .bpg__heading {
+    margin: 0;
+    font-family: var(--font-heading-family);
+    font-size: clamp(3rem, 4vw, 4.4rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--bpg-text);
+  }
+
+  .bpg__button {
+    display: inline-block;
+    padding: 1.6rem 2rem;
+    border: 1px solid color-mix(in srgb, var(--bpg-text) 30%, transparent);
+    color: var(--bpg-text);
+    font-size: 1.4rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .bpg__button:hover {
+    background-color: var(--bpg-text);
+    color: var(--bpg-bg);
+  }
+
+  /* ---------- Grid ---------- */
+  .bpg__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4rem 2.8rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media screen and (min-width: 750px) {
+    .bpg__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .bpg__grid {
+      grid-template-columns: repeat(var(--bpg-columns), 1fr);
+    }
+  }
+
+  /* ---------- Card ---------- */
+  .bpg__card {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .bpg__media {
+    position: relative;
+    overflow: hidden;          /* hides the part of the image that grows on hover */
+    aspect-ratio: 16 / 9;
+    background-color: color-mix(in srgb, var(--bpg-text) 8%, transparent);
+  }
+
+  .bpg__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .bpg__card:hover .bpg__image {
+    transform: scale(1.05);    /* the hover zoom */
+  }
+
+  .bpg__content {
+    padding-top: 2.8rem;
+    text-align: center;
+  }
+
+  .bpg__date {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    opacity: 0.75;
+  }
+
+  .bpg__title {
+    margin: 0;
+    font-family: var(--font-body-family);
+    font-size: 1.9rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--bpg-text);
+  }
+
+  .bpg__title-text {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.35rem;
+    transition: text-decoration-color 0.3s ease;
+  }
+
+  .bpg__card:hover .bpg__title-text {
+    text-decoration-color: currentColor;   /* the hover underline */
+  }
+
+  .bpg__empty {
+    text-align: center;
+    opacity: 0.7;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Blog posts grid",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Blog posts"
+    },
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": "Blog"
+    },
+    {
+      "type": "range",
+      "id": "post_limit",
+      "label": "Number of posts",
+      "info": "Used only when no Blog post blocks are added.",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Show 'View all' button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "View all"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#F7F2EC"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#2B2521"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    }
+  ],
+  "max_blocks": 6,
+  "blocks": [
+    {
+      "type": "post",
+      "name": "Blog post",
+      "settings": [
+        {
+          "type": "article",
+          "id": "article",
+          "label": "Blog post"
+        },
+        {
+          "type": "header",
+          "content": "Override (optional)"
+        },
+        {
+          "type": "paragraph",
+          "content": "Leave a field empty to use the blog post's own value."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title"
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Date text",
+          "info": "Example: Sep 28, 2020"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog posts grid",
+      "blocks": [
+        { "type": "post" },
+        { "type": "post" },
+        { "type": "post" }
+      ]
+    }
+  ]
+}
+{% endschema %}
