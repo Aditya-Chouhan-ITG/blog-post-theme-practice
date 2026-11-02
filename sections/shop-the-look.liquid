@@ -1,0 +1,375 @@
+{%- comment -%}
+  Shop the look (Tailwind version)
+  Lifestyle image with numbered dots + matching product cards.
+{%- endcomment -%}
+
+<shop-the-look
+  class="tw:block tw:bg-(--stl-bg) tw:text-(color:--stl-dark) tw:pt-(--stl-pad-top) tw:pb-(--stl-pad-bottom)"
+  style="
+    --stl-bg: {{ section.settings.background_color }};
+    --stl-dark: {{ section.settings.text_color }};
+    --stl-accent: {{ section.settings.accent_color }};
+    --stl-pad-top: {{ section.settings.padding_top }}px;
+    --stl-pad-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="page-width tw:grid tw:grid-cols-1 tw:items-center tw:gap-10 tw:lg:grid-cols-2 tw:lg:gap-25 tw:lg:max-w-[1300px]">
+
+    {%- comment -%} LEFT: the big image with the numbered dots {%- endcomment -%}
+    <div class="tw:relative tw:aspect-[4/5] tw:overflow-hidden">
+      {%- if section.settings.image -%}
+        {{
+          section.settings.image
+          | image_url: width: 1400
+          | image_tag:
+            class: 'tw:block tw:w-full tw:h-full tw:object-cover',
+            loading: 'lazy',
+            widths: '600, 900, 1200, 1400',
+            sizes: '(min-width: 990px) 45vw, 100vw'
+        }}
+      {%- else -%}
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'tw:block tw:w-full tw:h-full tw:object-cover' }}
+      {%- endif -%}
+
+      {%- assign number = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- assign item = block.settings.product -%}
+        {%- if item != blank -%}
+          {%- assign number = number | plus: 1 -%}
+          <button
+            type="button"
+            class="tw:absolute tw:left-(--x) tw:top-(--y) tw:-translate-1/2 tw:size-[38px] tw:p-0 tw:border-0 tw:rounded-full tw:bg-(--stl-bg) tw:text-(color:--stl-dark) tw:text-[13px] tw:cursor-pointer tw:shadow-[0_0_0_10px_rgba(255,255,255,0.2)] tw:transition tw:duration-300 tw:hover:scale-108 tw:data-active:bg-(--stl-dark) tw:data-active:text-(color:--stl-bg) tw:data-active:shadow-none"
+            style="--x: {{ block.settings.position_x }}%; --y: {{ block.settings.position_y }}%;"
+            data-stl-hotspot
+            data-index="{{ number }}"
+            {% if number == 1 %}data-active{% endif %}
+            aria-label="Show {{ item.title | escape }}"
+          >
+            {{ number }}
+          </button>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} RIGHT: text, product cards, button {%- endcomment -%}
+    <div>
+      {%- if section.settings.subheading != blank -%}
+        <p class="tw:m-0 tw:mb-5 tw:text-[13px] tw:tracking-[0.3em] tw:uppercase tw:text-(color:--stl-accent)">
+          {{ section.settings.subheading }}
+        </p>
+      {%- endif -%}
+
+      {%- if section.settings.heading != blank -%}
+        <h2 class="tw:m-0 tw:mb-6 tw:font-(family-name:--font-heading-family) tw:text-[clamp(3.6rem,4vw,5rem)] tw:font-light tw:tracking-[-0.03em] tw:leading-[1.1] tw:text-(color:--stl-dark)">
+          {{ section.settings.heading }}
+        </h2>
+      {%- endif -%}
+
+      {%- if section.settings.text != blank -%}
+        <p class="tw:m-0 tw:mb-10 tw:text-base tw:opacity-85">{{ section.settings.text }}</p>
+      {%- endif -%}
+
+      <ul class="tw:flex tw:flex-col tw:gap-3.5 tw:m-0 tw:mb-10 tw:p-0 tw:list-none" role="list">
+        {%- assign number = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- assign item = block.settings.product -%}
+
+          {%- if item != blank -%}
+            {%- assign number = number | plus: 1 -%}
+            {%- assign variant = item.selected_or_first_available_variant -%}
+
+            <li
+              class="tw:flex tw:items-center tw:gap-4.5 tw:p-3.5 tw:bg-white/45 tw:border tw:border-solid tw:border-transparent tw:cursor-pointer tw:transition tw:duration-300 tw:data-active:border-(--stl-accent) tw:data-active:shadow-[0_4px_14px_rgba(0,0,0,0.06)]"
+              data-stl-card
+              data-index="{{ number }}"
+              {% if number == 1 %}data-active{% endif %}
+              {{ block.shopify_attributes }}
+            >
+              <span class="tw:flex-none tw:grid tw:place-items-center tw:size-[26px] tw:border tw:border-solid tw:border-(--stl-accent) tw:rounded-full tw:text-xs">
+                {{ number }}
+              </span>
+
+              <div class="tw:flex-none tw:w-20 tw:aspect-[4/5] tw:overflow-hidden tw:bg-white">
+                {%- if item.featured_image -%}
+                  {{
+                    item.featured_image
+                    | image_url: width: 200
+                    | image_tag: loading: 'lazy', alt: item.title, class: 'tw:block tw:w-full tw:h-full tw:object-cover'
+                  }}
+                {%- endif -%}
+              </div>
+
+              <div class="tw:flex-1 tw:min-w-0">
+                {%- if item.vendor != blank -%}
+                  <p class="tw:m-0 tw:mb-1.5 tw:text-[11px] tw:tracking-[0.2em] tw:uppercase tw:opacity-70">
+                    {{ item.vendor }}
+                  </p>
+                {%- endif -%}
+                <a href="{{ item.url }}" class="tw:block tw:mb-1.5 tw:text-base tw:text-inherit tw:no-underline tw:hover:underline">
+                  {{ item.title | escape }}
+                </a>
+                <p class="tw:m-0 tw:text-[15px]">{{ variant.price | money }}</p>
+              </div>
+
+              <button
+                type="button"
+                class="tw:flex-none tw:grid tw:place-items-center tw:size-11 tw:p-0 tw:border tw:border-solid tw:border-(--stl-accent) tw:rounded-full tw:bg-transparent tw:text-(color:--stl-dark) tw:cursor-pointer tw:transition tw:duration-300 tw:enabled:hover:bg-(--stl-dark) tw:enabled:hover:border-(--stl-dark) tw:enabled:hover:text-(color:--stl-bg) tw:disabled:opacity-40 tw:disabled:cursor-not-allowed tw:aria-busy:opacity-50 tw:aria-busy:pointer-events-none"
+                data-stl-add
+                data-variant-id="{{ variant.id }}"
+                aria-label="Add {{ item.title | escape }} to bag"
+                {% unless variant.available %}disabled{% endunless %}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path d="M5 8h14l-1 12H6L5 8z"/>
+                  <path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+                </svg>
+              </button>
+            </li>
+
+          {%- elsif request.design_mode -%}
+            <li class="tw:flex tw:justify-center tw:p-7.5 tw:opacity-60" {{ block.shopify_attributes }}>
+              Choose a product for this block
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+
+      {%- if section.settings.button_label != blank -%}
+        <button
+          type="button"
+          class="tw:py-5 tw:px-9 tw:border-0 tw:bg-(--stl-dark) tw:text-(color:--stl-bg) tw:text-[13px] tw:tracking-[0.25em] tw:uppercase tw:cursor-pointer tw:transition-opacity tw:duration-300 tw:hover:opacity-85 tw:aria-busy:opacity-50 tw:aria-busy:pointer-events-none"
+          data-stl-add-all
+        >
+          {{ section.settings.button_label }}
+        </button>
+      {%- endif -%}
+
+      <p class="tw:min-h-5 tw:mt-3.5 tw:mb-0 tw:text-sm" data-stl-status role="status" aria-live="polite"></p>
+    </div>
+
+  </div>
+</shop-the-look>
+
+
+{% javascript %}
+  if (!customElements.get('shop-the-look')) {
+    class ShopTheLook extends HTMLElement {
+      // Runs automatically when <shop-the-look> appears on the page
+      connectedCallback() {
+        this.hotspots = this.querySelectorAll('[data-stl-hotspot]');
+        this.cards = this.querySelectorAll('[data-stl-card]');
+        this.status = this.querySelector('[data-stl-status]');
+
+        // NEW: dots and cards react to click, hover AND keyboard focus
+        [...this.hotspots, ...this.cards].forEach((element) => {
+          const activate = () => this.setActive(element.dataset.index);
+          element.addEventListener('click', activate);
+          element.addEventListener('mouseenter', activate);
+          element.addEventListener('focusin', activate);
+        });
+
+        // Bag button on each card → add that one product
+        this.querySelectorAll('[data-stl-add]').forEach((button) => {
+          button.addEventListener('click', () => {
+            this.addToCart([button.dataset.variantId], button);
+          });
+        });
+
+        // Big button → add every available product
+        const addAll = this.querySelector('[data-stl-add-all]');
+        if (addAll) {
+          addAll.addEventListener('click', () => {
+            const ids = [...this.querySelectorAll('[data-stl-add]:not([disabled])')]
+              .map((button) => button.dataset.variantId);
+            this.addToCart(ids, addAll);
+          });
+        }
+      }
+
+      // Put data-active on the dot and card with this number, remove it from the rest
+      setActive(index) {
+        [...this.hotspots, ...this.cards].forEach((element) => {
+          element.toggleAttribute('data-active', element.dataset.index === index);
+        });
+      }
+
+      async addToCart(variantIds, button) {
+        if (!variantIds.length) return;
+
+        // Dawn's cart drawer (only exists if Cart type = Drawer in theme settings)
+        const cartDrawer = document.querySelector('cart-drawer');
+        const sections = cartDrawer && cartDrawer.getSectionsToRender
+          ? cartDrawer.getSectionsToRender().map((section) => section.id)
+          : [];
+
+        const root = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+
+        button.setAttribute('aria-busy', 'true');
+        this.status.textContent = '';
+
+        try {
+          const response = await fetch(`${root}cart/add.js`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({
+              items: variantIds.map((id) => ({ id: Number(id), quantity: 1 })),
+              sections: sections,
+              sections_url: window.location.pathname,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            this.status.textContent = data.description || 'Could not add to bag.';
+            return;
+          }
+
+          if (cartDrawer && cartDrawer.renderContents) {
+            cartDrawer.classList.remove('is-empty');   // NEW: same as Dawn's own add-to-cart
+            cartDrawer.renderContents(data);            // refresh + slide open on the right
+          } else {
+            window.location.href = `${root}cart`;       // no drawer → go to cart page
+          }
+        } catch (error) {
+          this.status.textContent = 'Something went wrong. Please try again.';
+        } finally {
+          button.removeAttribute('aria-busy');
+        }
+      }
+    }
+
+    customElements.define('shop-the-look', ShopTheLook);
+  }
+{% endjavascript %}
+
+
+{% schema %}
+{
+    "name": "Shop the look",
+    "tag": "section",
+    "class": "section",
+    "settings": [
+        {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Lifestyle image"
+        },
+        {
+            "type": "text",
+            "id": "subheading",
+            "label": "Subheading",
+            "default": "Styled at Desert Nest Co."
+        },
+        {
+            "type": "text",
+            "id": "heading",
+            "label": "Heading",
+            "default": "Shop the look"
+        },
+        {
+            "type": "text",
+            "id": "text",
+            "label": "Text",
+            "default": "Tap a dot to see each piece."
+        },
+        {
+            "type": "text",
+            "id": "button_label",
+            "label": "Button label",
+            "default": "Add the look to bag"
+        },
+        {
+            "type": "header",
+            "content": "Colors"
+        },
+        {
+            "type": "color",
+            "id": "background_color",
+            "label": "Background",
+            "default": "#F7F2EC"
+        },
+        {
+            "type": "color",
+            "id": "text_color",
+            "label": "Text",
+            "default": "#3B2A24"
+        },
+        {
+            "type": "color",
+            "id": "accent_color",
+            "label": "Accent",
+            "default": "#A0623A"
+        },
+        {
+            "type": "header",
+            "content": "Spacing"
+        },
+        {
+            "type": "range",
+            "id": "padding_top",
+            "label": "Top padding",
+            "min": 0,
+            "max": 120,
+            "step": 4,
+            "unit": "px",
+            "default": 80
+        },
+        {
+            "type": "range",
+            "id": "padding_bottom",
+            "label": "Bottom padding",
+            "min": 0,
+            "max": 120,
+            "step": 4,
+            "unit": "px",
+            "default": 80
+        }
+    ],
+    "max_blocks": 6,
+    "blocks": [
+        {
+            "type": "product",
+            "name": "Product",
+            "settings": [
+                {
+                    "type": "product",
+                    "id": "product",
+                    "label": "Product"
+                },
+                {
+                    "type": "range",
+                    "id": "position_x",
+                    "label": "Dot position – left",
+                    "min": 0,
+                    "max": 100,
+                    "step": 1,
+                    "unit": "%",
+                    "default": 50
+                },
+                {
+                    "type": "range",
+                    "id": "position_y",
+                    "label": "Dot position – top",
+                    "min": 0,
+                    "max": 100,
+                    "step": 1,
+                    "unit": "%",
+                    "default": 50
+                }
+            ]
+        }
+    ],
+    "presets": [
+        {
+            "name": "Shop the look",
+            "blocks": [
+                { "type": "product" },
+                { "type": "product" },
+                { "type": "product" }
+            ]
+        }
+    ]
+}
+
+{% endschema  %}

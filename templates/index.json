@@ -121,16 +121,64 @@
         "show_date": true,
         "show_view_all": true,
         "button_label": "View all",
-        "background_color": "#F7F2EC",
-        "text_color": "#2B2521",
+        "background_color": "#f7f2ec",
+        "text_color": "#2b2521",
         "padding_top": 48,
         "padding_bottom": 72
+      }
+    },
+    "shop_the_look_KefmQJ": {
+      "type": "shop-the-look",
+      "blocks": {
+        "product_4gFGMM": {
+          "type": "product",
+          "settings": {
+            "product": "le-lis",
+            "position_x": 63,
+            "position_y": 29
+          }
+        },
+        "product_nqKxBN": {
+          "type": "product",
+          "settings": {
+            "product": "rag-company",
+            "position_x": 56,
+            "position_y": 77
+          }
+        },
+        "product_JcAf76": {
+          "type": "product",
+          "settings": {
+            "product": "desert-nest-co",
+            "position_x": 42,
+            "position_y": 47
+          }
+        }
+      },
+      "block_order": [
+        "product_4gFGMM",
+        "product_nqKxBN",
+        "product_JcAf76"
+      ],
+      "name": "Shop the look",
+      "settings": {
+        "image": "shopify://shop_images/look-spotted-faux-fur-jacket-editorial.webp",
+        "subheading": "Styled at Desert Nest Co.",
+        "heading": "Shop the look",
+        "text": "Tap a dot to see each piece.",
+        "button_label": "Add the look to bag",
+        "background_color": "#F7F2EC",
+        "text_color": "#3B2A24",
+        "accent_color": "#A0623A",
+        "padding_top": 80,
+        "padding_bottom": 80
       }
     }
   },
   "order": [
     "image_banner",
     "featured_collection",
-    "blog_posts_grid_NabYDP"
+    "blog_posts_grid_NabYDP",
+    "shop_the_look_KefmQJ"
   ]
 }

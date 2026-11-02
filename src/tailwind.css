@@ -1,0 +1,45 @@
+/*
+  Tailwind source file. Do not edit assets/tailwind.css — it is generated.
+  Build:  npm run tw:build   |   Watch:  npm run tw:watch
+
+  - No preflight/reset is imported, so Dawn's base.css keeps working as before.
+  - Every utility is prefixed with `tw:` (e.g. tw:flex, tw:md:grid-cols-2)
+    so it never collides with Dawn class names like .grid or .hidden.
+  - Utilities are !important so they win over Dawn's element styles.
+*/
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme) prefix(tw);
+@import "tailwindcss/utilities.css" layer(utilities) important;
+
+@source "../sections";
+@source "../snippets";
+@source "../layout";
+@source "../templates";
+
+/* Dawn sets html { font-size: 62.5% } (1rem = 10px), so scale rem-based tokens back up */
+@theme {
+  --spacing: 0.4rem;
+
+  --text-xs: 1.2rem;
+  --text-sm: 1.4rem;
+  --text-base: 1.6rem;
+  --text-lg: 1.8rem;
+  --text-xl: 2rem;
+  --text-2xl: 2.4rem;
+  --text-3xl: 3rem;
+  --text-4xl: 3.6rem;
+  --text-5xl: 4.8rem;
+  --text-6xl: 6rem;
+
+  --radius-xs: 0.2rem;
+  --radius-sm: 0.4rem;
+  --radius-md: 0.6rem;
+  --radius-lg: 0.8rem;
+  --radius-xl: 1.2rem;
+  --radius-2xl: 1.6rem;
+  --radius-3xl: 2.4rem;
+
+  /* Match Dawn's breakpoints (750px / 990px) */
+  --breakpoint-md: 750px;
+  --breakpoint-lg: 990px;
+}
